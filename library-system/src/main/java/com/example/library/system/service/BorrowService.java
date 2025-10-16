@@ -10,13 +10,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class BorrowService {
 
-    private BorrowRepository borrowRepository;
-    private UserRepository userRepository;
-    private BookRepository bookRepository;
+    private final BorrowRepository borrowRepository;
+    private final UserRepository userRepository;
+    private final BookRepository bookRepository;
 
     public BorrowService(BorrowRepository borrowRepository, UserRepository userRepository, BookRepository bookRepository) {
         this.borrowRepository = borrowRepository;
@@ -73,6 +75,31 @@ public class BorrowService {
     // Get all borrows (admin)
     public List<Borrow> getAllBorrows() {
         return borrowRepository.findAll();
+    }
+
+    // Admin report: number of books borrowed per user
+    public Map<String, Long> getBorrowCountPerUser() {
+        List<Borrow> allBorrows = borrowRepository.findAll();
+        return allBorrows.stream()
+                .collect(Collectors.groupingBy(
+                        b -> b.getUser().getUsername(),
+                        Collectors.counting()
+                ));
+    }
+
+    // Admin report: detailed borrow info per user
+    public Map<String, List<String>> getUserBorrowDetails() {
+        List<Borrow> allBorrows = borrowRepository.findAll();
+        return allBorrows.stream()
+                .collect(Collectors.groupingBy(
+                        b -> b.getUser().getUsername(),
+                        Collectors.mapping(
+                                b -> b.getBook().getTitle() +
+                                        " (Borrowed: " + b.getBorrowDate() +
+                                        ", Returned: " + (b.getReturnDate() != null ? b.getReturnDate() : "Not yet") + ")",
+                                Collectors.toList()
+                        )
+                ));
     }
 
     // Helper methods
