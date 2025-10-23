@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:4200") // allow Angular frontend
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -45,11 +46,15 @@ public class AuthController {
     // -------------------- LOGIN --------------------
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        // Authenticate using Spring Security
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
 
-        User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
+        // Fetch user from DB
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         return ResponseEntity.ok(new LoginResponse(user.getUsername(), user.getRole()));
     }
 
