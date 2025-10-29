@@ -11,36 +11,34 @@ public class Borrow {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
 
-    @ManyToOne
-    @JoinColumn(name = "book_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
+    @Column(nullable = false)
     private LocalDateTime borrowDate;
 
     private LocalDateTime returnDate;
+    private boolean returned = false;
 
-    // Default constructor
     public Borrow() {}
 
-    // Constructor with all fields
-    public Borrow(Long id, User user, Book book, LocalDateTime borrowDate, LocalDateTime returnDate) {
-        this.id = id;
-        this.user = user;
+    public Borrow(User student, Book book) {
+        this.student = student;
         this.book = book;
-        this.borrowDate = borrowDate;
-        this.returnDate = returnDate;
+        this.borrowDate = LocalDateTime.now();
+        this.returned = false;
     }
 
-    // Getters and Setters
+    // Getters & Setters
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public User getStudent() { return student; }
+    public void setStudent(User student) { this.student = student; }
 
     public Book getBook() { return book; }
     public void setBook(Book book) { this.book = book; }
@@ -50,4 +48,7 @@ public class Borrow {
 
     public LocalDateTime getReturnDate() { return returnDate; }
     public void setReturnDate(LocalDateTime returnDate) { this.returnDate = returnDate; }
+
+    public boolean isReturned() { return returned; }
+    public void setReturned(boolean returned) { this.returned = returned; }
 }

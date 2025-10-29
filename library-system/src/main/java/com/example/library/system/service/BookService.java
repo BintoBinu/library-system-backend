@@ -15,45 +15,36 @@ public class BookService {
         this.bookRepository = bookRepository;
     }
 
-    // Add a new book
-    public Book addBook(Book book) {
-        if (book.getStock() == null) {
-            book.setStock(1); // default stock
-        }
-        if (book.getIsBorrowed() == null) {
-            book.setIsBorrowed(false); // default borrowed status
-        }
-        return bookRepository.save(book);
-    }
-
-    // Get all books
+    // ✅ Get all books
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
 
-    // Edit a book
-    public Book editBook(Long id, Book updatedBook) {
-        Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Book not found with ID: " + id));
-
-        book.setTitle(updatedBook.getTitle());
-        book.setAuthor(updatedBook.getAuthor());
-        book.setStock(updatedBook.getStock());
-        book.setIsBorrowed(updatedBook.getIsBorrowed());
-
+    // ✅ Add a new book
+    public Book addBook(Book book) {
+        if (book.getStock() < 0) {
+            throw new RuntimeException("Stock cannot be negative");
+        }
         return bookRepository.save(book);
     }
 
-    // Delete a book
-    public void deleteBook(Long id) {
-        Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Book not found with ID: " + id));
-        bookRepository.delete(book);
+    // ✅ Update an existing book
+    public Book updateBook(Long id, Book updatedBook) {
+        Book existing = bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        existing.setTitle(updatedBook.getTitle());
+        existing.setAuthor(updatedBook.getAuthor());
+        existing.setStock(updatedBook.getStock());
+
+        return bookRepository.save(existing);
     }
 
-    // Find a book by ID
-    public Book getBookById(Long id) {
-        return bookRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Book not found with ID: " + id));
+    // ✅ Delete a book
+    public void deleteBook(Long id) {
+        if (!bookRepository.existsById(id)) {
+            throw new RuntimeException("Book not found");
+        }
+        bookRepository.deleteById(id);
     }
 }

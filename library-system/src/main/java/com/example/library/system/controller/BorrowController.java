@@ -2,49 +2,47 @@ package com.example.library.system.controller;
 
 import com.example.library.system.entity.Borrow;
 import com.example.library.system.service.BorrowService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/borrow")
+@RequestMapping("/api/borrows")
+@CrossOrigin(origins = "http://localhost:4200")
 public class BorrowController {
 
-    private BorrowService borrowService;
+    private final BorrowService borrowService;
 
     public BorrowController(BorrowService borrowService) {
         this.borrowService = borrowService;
     }
 
-    // Borrow a book
-    @PostMapping("/{bookId}")
-    public ResponseEntity<Borrow> borrowBook(@PathVariable Long bookId, Authentication authentication) {
-        Long userId = borrowService.getUserIdByUsername(authentication.getName());
-        Borrow borrow = borrowService.borrowBook(userId, bookId);
-        return ResponseEntity.ok(borrow);
+    // ✅ Student — borrow a book
+    @PreAuthorize("hasAuthority('STUDENT')")
+    @PostMapping("/borrow")
+    public Borrow borrowBook(@RequestParam Long userId, @RequestParam Long bookId) {
+        return borrowService.borrowBook(userId, bookId);
     }
 
-    // Return a book
+    // ✅ Student — return a borrowed book
+    @PreAuthorize("hasAuthority('STUDENT')")
     @PostMapping("/return/{borrowId}")
-    public ResponseEntity<Borrow> returnBook(@PathVariable Long borrowId) {
-        Borrow borrow = borrowService.returnBook(borrowId);
-        return ResponseEntity.ok(borrow);
+    public Borrow returnBook(@PathVariable Long borrowId) {
+        return borrowService.returnBook(borrowId);
     }
 
-    // List all borrows of logged-in student
-    @GetMapping("/my")
-    public ResponseEntity<List<Borrow>> getMyBorrows(Authentication authentication) {
-        Long userId = borrowService.getUserIdByUsername(authentication.getName());
-        List<Borrow> borrows = borrowService.getUserBorrows(userId);
-        return ResponseEntity.ok(borrows);
+    // ✅ Student — view their borrow history
+    @PreAuthorize("hasAuthority('STUDENT')")
+    @GetMapping("/history/{userId}")
+    public List<Borrow> getBorrowHistory(@PathVariable Long userId) {
+        return borrowService.getBorrowHistoryByUser(userId);
     }
 
-    // List all borrows (admin only)
-    @GetMapping("/all")
-    public ResponseEntity<List<Borrow>> getAllBorrows() {
-        List<Borrow> borrows = borrowService.getAllBorrows();
-        return ResponseEntity.ok(borrows);
+    // ✅ Admin — view all borrow records
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping
+    public List<Borrow> getAllBorrows() {
+        return borrowService.getAllBorrows();
     }
 }

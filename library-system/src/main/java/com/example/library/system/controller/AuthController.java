@@ -1,80 +1,58 @@
 package com.example.library.system.controller;
 
+import com.example.library.system.config.JwtUtil;
+import com.example.library.system.dto.LoginRequestDTO;
+import com.example.library.system.dto.UserDTO;
 import com.example.library.system.entity.User;
-import com.example.library.system.repository.UserRepository;
-import lombok.Data;
+import com.example.library.system.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200") // allow Angular frontend
+@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    public AuthController(AuthenticationManager authenticationManager,
-                          UserRepository userRepository,
-                          PasswordEncoder passwordEncoder) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public AuthController(UserService userService, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
-    // -------------------- REGISTER --------------------
+    // ✅ Register a new user
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already exists!");
+    public ResponseEntity<?> register(@RequestBody User user) {
+        try {
+            User savedUser = userService.register(user.getUsername(), user.getPassword(), user.getRole());
+            return ResponseEntity.ok(new UserDTO(savedUser.getUsername(), savedUser.getRole()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         }
-
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole().toUpperCase()); // "ADMIN" or "STUDENT"
-        userRepository.save(user);
-
-        return ResponseEntity.ok("User registered successfully!");
     }
 
-    // -------------------- LOGIN --------------------
+    // ✅ Login user and return JWT
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        // Authenticate using Spring Security
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO request) {
+        return userService.login(request.getUsername(), request.getPassword())
+                .map(user -> {
+                    String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
-        // Fetch user from DB
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("userId", user.getId());
+                    response.put("username", user.getUsername());
+                    response.put("role", user.getRole());
+                    response.put("token", token);
 
-        return ResponseEntity.ok(new LoginResponse(user.getUsername(), user.getRole()));
-    }
-
-    // -------------------- REQUEST & RESPONSE CLASSES --------------------
-    @Data
-    public static class RegisterRequest {
-        private String username;
-        private String password;
-        private String role; // "ADMIN" or "STUDENT"
-    }
-
-    @Data
-    public static class LoginRequest {
-        private String username;
-        private String password;
-    }
-
-    @Data
-    public static class LoginResponse {
-        private final String username;
-        private final String role;
+                    return ResponseEntity.ok(response);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Invalid username or password")));
     }
 }

@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/books")
+@CrossOrigin(origins = "http://localhost:4200")
 public class BookController {
 
     private final BookService bookService;
@@ -17,31 +18,31 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    // Add a book (Admin only)
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    public Book addBook(@RequestBody Book book) {
-        return bookService.addBook(book);
-    }
-
-    // Get all books (everyone)
+    // ✅ Public — get all books
     @GetMapping
     public List<Book> getAllBooks() {
         return bookService.getAllBooks();
     }
 
-    // Edit a book (Admin only)
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
-    public Book editBook(@PathVariable Long id, @RequestBody Book book) {
-        return bookService.editBook(id, book);
+    // ✅ Admin — add new book
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping
+    public Book addBook(@RequestBody Book book) {
+        return bookService.addBook(book);
     }
 
-    // Delete a book (Admin only)
-    @PreAuthorize("hasRole('ADMIN')")
+    // ✅ Admin — update existing book
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/{id}")
+    public Book updateBook(@PathVariable Long id, @RequestBody Book updatedBook) {
+        return bookService.updateBook(id, updatedBook);
+    }
+
+    // ✅ Admin — delete book
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public String deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
-        return "Book deleted successfully";
+        return "Book deleted successfully.";
     }
 }

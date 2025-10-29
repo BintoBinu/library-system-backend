@@ -1,45 +1,69 @@
 package com.example.library.system.controller;
 
+import com.example.library.system.entity.Borrow;
+import com.example.library.system.entity.User;
 import com.example.library.system.service.BorrowService;
-import org.springframework.security.core.session.SessionInformation;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.library.system.service.UserService;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/admin")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AdminController {
 
+    private final UserService userService;
     private final BorrowService borrowService;
-    private final SessionRegistry sessionRegistry;
 
-    public AdminController(BorrowService borrowService, SessionRegistry sessionRegistry) {
+    public AdminController(UserService userService, BorrowService borrowService) {
+        this.userService = userService;
         this.borrowService = borrowService;
-        this.sessionRegistry = sessionRegistry;
     }
 
-   
-    @GetMapping("/logged-in-users")
-    public List<String> getLoggedInUsers() {
-        return sessionRegistry.getAllPrincipals().stream()
-                .map(Object::toString) // usually the username
-                .collect(Collectors.toList());
+    // ✅ Get all users
+    @GetMapping("/users")
+    public List<User> getAllUsers() {
+        return userService.findAllUsers();
     }
 
-   
-    @GetMapping("/borrow-count")
-    public Map<String, Long> getBorrowCountPerUser() {
-        return borrowService.getBorrowCountPerUser();
+    // ✅ Get all borrow records (for admin)
+    @GetMapping("/borrows")
+    public List<Borrow> getAllBorrowRecords() {
+        return borrowService.getAllBorrows();
     }
 
-    
-    @GetMapping("/borrow-report")
-    public Map<String, List<String>> getUserBorrowDetails() {
-        return borrowService.getUserBorrowDetails();
+    // ✅ Get detailed borrow info per user — what books they borrowed & returned
+    @GetMapping("/users/borrow-details")
+    public List<Map<String, Object>> getAllUserBorrowDetails() {
+        List<User> users = userService.findAllUsers();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (User user : users) {
+            Map<String, Object> userDetails = new HashMap<>();
+            userDetails.put("userId", user.getId());
+            userDetails.put("username", user.getUsername());
+            userDetails.put("role", user.getRole());
+
+            // Fetch borrow history for each user
+            List<Borrow> borrows = borrowService.getBorrowHistoryByUser(user.getId());
+
+            // Prepare book info list
+            List<Map<String, Object>> borrowInfo = new ArrayList<>();
+            for (Borrow borrow : borrows) {
+                Map<String, Object> info = new HashMap<>();
+                info.put("bookId", borrow.getBook().getId());
+                info.put("bookTitle", borrow.getBook().getTitle());
+                info.put("borrowDate", borrow.getBorrowDate());
+                info.put("returnDate", borrow.getReturnDate());
+                info.put("isReturned", borrow.getReturnDate() != null);
+                borrowInfo.add(info);
+            }
+
+            userDetails.put("borrowedBooks", borrowInfo);
+            result.add(userDetails);
+        }
+
+        return result;
     }
 }

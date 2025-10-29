@@ -5,6 +5,7 @@ import com.example.library.system.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,13 +19,37 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User registerUser(User user) {
-        // Encode password before saving
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    // ✅ Register a new user (ADMIN or STUDENT)
+    public User register(String username, String password, String role) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        if (!role.equalsIgnoreCase("ADMIN") && !role.equalsIgnoreCase("STUDENT")) {
+            throw new RuntimeException("Invalid role. Use ADMIN or STUDENT");
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(role.toUpperCase());
+
         return userRepository.save(user);
     }
 
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    // ✅ Login validation
+    public Optional<User> login(String username, String password) {
+        return userRepository.findByUsername(username)
+                .filter(user -> passwordEncoder.matches(password, user.getPassword()));
+    }
+
+    // ✅ Fetch user by ID
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    // ✅ List all users (for admin)
+    public List<User> findAllUsers() {
+        return userRepository.findAll();
     }
 }
