@@ -21,19 +21,19 @@ public class AdminController {
         this.borrowService = borrowService;
     }
 
-    // ✅ Get all users
+    //  Get all users
     @GetMapping("/users")
     public List<User> getAllUsers() {
         return userService.findAllUsers();
     }
 
-    // ✅ Get all borrow records (for admin)
+    // Get all borrow records (for admin)
     @GetMapping("/borrows")
     public List<Borrow> getAllBorrowRecords() {
         return borrowService.getAllBorrows();
     }
 
-    // ✅ Get detailed borrow info per user — what books they borrowed & returned
+    //  Get detailed borrow info per user — what books they borrowed & returned
     @GetMapping("/users/borrow-details")
     public List<Map<String, Object>> getAllUserBorrowDetails() {
         List<User> users = userService.findAllUsers();

@@ -31,10 +31,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // ✅ JWT, not sessions — disable CSRF
+                // JWT, not sessions — disable CSRF
                 .csrf(csrf -> csrf.disable())
 
-                // ✅ CORS for Angular frontend
+                //  CORS for Angular frontend
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .authorizeHttpRequests(auth -> auth
@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
 
                         // Student-only endpoints
-                        .requestMatchers("/api/borrows/**").hasAuthority("STUDENT")
+                        .requestMatchers("/api/borrows/**").hasAnyAuthority("ADMIN", "STUDENT")
 
                         // Anyone can view books
                         .requestMatchers("/api/books", "/api/books/**").permitAll()
@@ -63,7 +63,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ CORS configuration
+    //  CORS configuration
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -77,14 +77,14 @@ public class SecurityConfig {
         return source;
     }
 
-    // ✅ AuthManager bean (required by AuthService)
+    //  AuthManager bean (required by AuthService)
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
             throws Exception {
         return configuration.getAuthenticationManager();
     }
 
-    // ✅ Password encoding with BCrypt
+    // Password encoding with BCrypt
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

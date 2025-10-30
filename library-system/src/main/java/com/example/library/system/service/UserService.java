@@ -19,7 +19,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // ✅ Register a new user (ADMIN or STUDENT)
+    //  Register a new user (ADMIN or STUDENT)
     public User register(String username, String password, String role) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new RuntimeException("Username already exists");
@@ -37,18 +37,18 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // ✅ Login validation
+    //  Login validation
     public Optional<User> login(String username, String password) {
         return userRepository.findByUsername(username)
                 .filter(user -> passwordEncoder.matches(password, user.getPassword()));
     }
 
-    // ✅ Fetch user by ID
+    // Fetch user by ID
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
 
-    // ✅ List all users (for admin)
+    //  List all users (for admin)
     public List<User> findAllUsers() {
         return userRepository.findAll();
     }

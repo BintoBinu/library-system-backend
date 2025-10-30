@@ -26,7 +26,7 @@ public class BorrowService {
         this.userRepository = userRepository;
     }
 
-    // ✅ Borrow a book
+    //  Borrow a book
     public Borrow borrowBook(Long userId, Long bookId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -46,7 +46,7 @@ public class BorrowService {
         return borrowRepository.save(borrow);
     }
 
-    // ✅ Return a book
+    //  Return a book
     public Borrow returnBook(Long borrowId) {
         Borrow borrow = borrowRepository.findById(borrowId)
                 .orElseThrow(() -> new RuntimeException("Borrow record not found"));
@@ -65,12 +65,12 @@ public class BorrowService {
         return borrowRepository.save(borrow);
     }
 
-    // ✅ Borrow history of a student
+    // Borrow history of a student
     public List<Borrow> getBorrowHistoryByUser(Long userId) {
         return borrowRepository.findByStudentId(userId);
     }
 
-    // ✅ All borrow records (for admin)
+    //  All borrow records (for admin)
     public List<Borrow> getAllBorrows() {
         return borrowRepository.findAll();
     }

@@ -15,12 +15,12 @@ public class BookService {
         this.bookRepository = bookRepository;
     }
 
-    // ✅ Get all books
+    //  Get all books
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
 
-    // ✅ Add a new book
+    //  Add  new book
     public Book addBook(Book book) {
         if (book.getStock() < 0) {
             throw new RuntimeException("Stock cannot be negative");
@@ -28,7 +28,7 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    // ✅ Update an existing book
+    //  Update an existing book
     public Book updateBook(Long id, Book updatedBook) {
         Book existing = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
@@ -40,7 +40,7 @@ public class BookService {
         return bookRepository.save(existing);
     }
 
-    // ✅ Delete a book
+    //  Delete book
     public void deleteBook(Long id) {
         if (!bookRepository.existsById(id)) {
             throw new RuntimeException("Book not found");
