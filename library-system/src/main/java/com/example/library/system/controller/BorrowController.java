@@ -17,29 +17,26 @@ public class BorrowController {
     public BorrowController(BorrowService borrowService) {
         this.borrowService = borrowService;
     }
-
-    //  Student — borrow a book
+    
     @PreAuthorize("hasAuthority('STUDENT')")
     @PostMapping("/borrow")
     public Borrow borrowBook(@RequestParam Long userId, @RequestParam Long bookId) {
         return borrowService.borrowBook(userId, bookId);
     }
 
-    //  Student — return a borrowed book
     @PreAuthorize("hasAuthority('STUDENT')")
     @PostMapping("/return/{borrowId}")
     public Borrow returnBook(@PathVariable Long borrowId) {
         return borrowService.returnBook(borrowId);
     }
 
-    // Student — view their borrow history
+    
     @PreAuthorize("hasAuthority('STUDENT')")
     @GetMapping("/history/{userId}")
     public List<Borrow> getBorrowHistory(@PathVariable Long userId) {
         return borrowService.getBorrowHistoryByUser(userId);
     }
 
-    // Admin — view all borrow records
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public List<Borrow> getAllBorrows() {

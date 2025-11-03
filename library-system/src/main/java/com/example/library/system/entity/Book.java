@@ -19,21 +19,18 @@ public class Book {
     @Column(nullable = false)
     private int stock;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     public Book() {}
 
-    public Book(String title, String author, int stock) {
+    public Book(String title, String author, int stock, String imageUrl) {
         this.title = title;
         this.author = author;
         this.stock = stock;
+        this.imageUrl = imageUrl;
     }
 
-    // Computed availability
-    @Transient
-    public boolean isAvailable() {
-        return stock > 0;
-    }
-
-    // Getters & Setters
     public Long getId() { return id; }
 
     public String getTitle() { return title; }
@@ -44,4 +41,12 @@ public class Book {
 
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    @Transient
+    public boolean isAvailable() {
+        return stock > 0;
+    }
 }

@@ -31,39 +31,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // JWT, not sessions — disable CSRF
+                
                 .csrf(csrf -> csrf.disable())
-
-                //  CORS for Angular frontend
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
-
-                        // Admin-only endpoints
-                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-
-                        // Student-only endpoints
-                        .requestMatchers("/api/borrows/**").hasAnyAuthority("ADMIN", "STUDENT")
-
-                        // Anyone can view books
-                        .requestMatchers("/api/books", "/api/books/**").permitAll()
-
-                        // Everything else requires auth
-                        .anyRequest().authenticated()
+                 .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/api/borrows/**").hasAnyAuthority("ADMIN", "STUDENT")
+       .requestMatchers("/api/books", "/api/books/**").permitAll()
+       .anyRequest().authenticated()
                 )
-
-                // Allow H2 console
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
 
-                // Add custom JWT filter before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    //  CORS configuration
+  
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -77,14 +62,13 @@ public class SecurityConfig {
         return source;
     }
 
-    //  AuthManager bean (required by AuthService)
+   
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
             throws Exception {
         return configuration.getAuthenticationManager();
     }
 
-    // Password encoding with BCrypt
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

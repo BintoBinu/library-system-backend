@@ -8,9 +8,6 @@ import java.util.List;
 @Repository
 public interface BorrowRepository extends JpaRepository<Borrow, Long> {
 
-    // Find all borrow records for a given student
     List<Borrow> findByStudentId(Long studentId);
-
-    // Optional: Find active borrows (not yet returned)
     List<Borrow> findByStudentIdAndReturnedFalse(Long studentId);
 }

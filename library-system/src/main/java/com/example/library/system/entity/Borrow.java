@@ -34,7 +34,6 @@ public class Borrow {
         this.returned = false;
     }
 
-    // Getters & Setters
     public Long getId() { return id; }
 
     public User getStudent() { return student; }

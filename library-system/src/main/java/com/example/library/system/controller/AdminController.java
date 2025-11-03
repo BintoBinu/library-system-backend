@@ -21,19 +21,16 @@ public class AdminController {
         this.borrowService = borrowService;
     }
 
-    //  Get all users
     @GetMapping("/users")
     public List<User> getAllUsers() {
         return userService.findAllUsers();
     }
 
-    // Get all borrow records (for admin)
     @GetMapping("/borrows")
     public List<Borrow> getAllBorrowRecords() {
         return borrowService.getAllBorrows();
     }
 
-    //  Get detailed borrow info per user — what books they borrowed & returned
     @GetMapping("/users/borrow-details")
     public List<Map<String, Object>> getAllUserBorrowDetails() {
         List<User> users = userService.findAllUsers();
@@ -45,10 +42,10 @@ public class AdminController {
             userDetails.put("username", user.getUsername());
             userDetails.put("role", user.getRole());
 
-            // Fetch borrow history for each user
+
             List<Borrow> borrows = borrowService.getBorrowHistoryByUser(user.getId());
 
-            // Prepare book info list
+           
             List<Map<String, Object>> borrowInfo = new ArrayList<>();
             for (Borrow borrow : borrows) {
                 Map<String, Object> info = new HashMap<>();

@@ -18,27 +18,23 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    //  Public — get all books
     @GetMapping
     public List<Book> getAllBooks() {
         return bookService.getAllBooks();
     }
 
-    // Admin — add new book
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public Book addBook(@RequestBody Book book) {
         return bookService.addBook(book);
     }
 
-    // Admin — update existing book
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public Book updateBook(@PathVariable Long id, @RequestBody Book updatedBook) {
         return bookService.updateBook(id, updatedBook);
     }
 
-    //  Admin — delete book
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public String deleteBook(@PathVariable Long id) {

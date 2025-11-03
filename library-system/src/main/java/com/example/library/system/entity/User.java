@@ -24,8 +24,6 @@ public class User {
         this.password = password;
         this.role = role;
     }
-
-    // Getters & Setters
     public Long getId() { return id; }
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }

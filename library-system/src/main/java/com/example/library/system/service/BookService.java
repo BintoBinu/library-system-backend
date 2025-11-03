@@ -1,5 +1,5 @@
 package com.example.library.system.service;
-
+import org.springframework.data.domain.Sort;
 import com.example.library.system.entity.Book;
 import com.example.library.system.repository.BookRepository;
 import org.springframework.stereotype.Service;
@@ -15,12 +15,12 @@ public class BookService {
         this.bookRepository = bookRepository;
     }
 
-    //  Get all books
+    
     public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+        return bookRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
-    //  Add  new book
+   
     public Book addBook(Book book) {
         if (book.getStock() < 0) {
             throw new RuntimeException("Stock cannot be negative");
@@ -28,7 +28,6 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    //  Update an existing book
     public Book updateBook(Long id, Book updatedBook) {
         Book existing = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
@@ -36,11 +35,10 @@ public class BookService {
         existing.setTitle(updatedBook.getTitle());
         existing.setAuthor(updatedBook.getAuthor());
         existing.setStock(updatedBook.getStock());
-
+        existing.setImageUrl(updatedBook.getImageUrl());
         return bookRepository.save(existing);
     }
 
-    //  Delete book
     public void deleteBook(Long id) {
         if (!bookRepository.existsById(id)) {
             throw new RuntimeException("Book not found");

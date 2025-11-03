@@ -12,7 +12,7 @@ public class UserDTO {
         this.role = role;
     }
 
-    // Getters & Setters
+    
     public String getUsername() {
         return username;
     }
