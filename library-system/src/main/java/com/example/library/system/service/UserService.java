@@ -1,4 +1,5 @@
 package com.example.library.system.service;
+
 import org.springframework.data.domain.Sort;
 import com.example.library.system.entity.User;
 import com.example.library.system.repository.UserRepository;
@@ -18,8 +19,6 @@ public class UserService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
-
-    
     public User register(String username, String password, String role) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new RuntimeException("Username already exists");
@@ -36,20 +35,27 @@ public class UserService {
 
         return userRepository.save(user);
     }
-
-    
-    public Optional<User> login(String username, String password) {
+ public Optional<User> login(String username, String password) {
         return userRepository.findByUsername(username)
                 .filter(user -> passwordEncoder.matches(password, user.getPassword()));
     }
-
-    
-    public Optional<User> findById(Long id) {
+public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
-
-    
-    public List<User> findAllUsers() {
+public List<User> findAllUsers() {
         return userRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    }
+    public User resetStudentCredentials(Long studentId, String newUsername, String newPassword) {
+        User user = userRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        if (!user.getRole().equalsIgnoreCase("STUDENT")) {
+            throw new RuntimeException("Only student credentials can be reset");
+        }
+
+        user.setUsername(newUsername);
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        return userRepository.save(user);
     }
 }

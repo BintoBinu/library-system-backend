@@ -4,6 +4,7 @@ import com.example.library.system.entity.Borrow;
 import com.example.library.system.entity.User;
 import com.example.library.system.service.BorrowService;
 import com.example.library.system.service.UserService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -42,10 +43,8 @@ public class AdminController {
             userDetails.put("username", user.getUsername());
             userDetails.put("role", user.getRole());
 
-
             List<Borrow> borrows = borrowService.getBorrowHistoryByUser(user.getId());
 
-           
             List<Map<String, Object>> borrowInfo = new ArrayList<>();
             for (Borrow borrow : borrows) {
                 Map<String, Object> info = new HashMap<>();
@@ -62,5 +61,16 @@ public class AdminController {
         }
 
         return result;
+    }
+
+    
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/reset/{studentId}")
+    public User resetStudentCredentials(
+            @PathVariable Long studentId,
+            @RequestParam String newUsername,
+            @RequestParam String newPassword) {
+
+        return userService.resetStudentCredentials(studentId, newUsername, newPassword);
     }
 }
